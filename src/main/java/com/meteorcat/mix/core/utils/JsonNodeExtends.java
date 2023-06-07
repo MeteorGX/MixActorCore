@@ -1,6 +1,7 @@
 package com.meteorcat.mix.core.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -10,7 +11,13 @@ import java.util.*;
  * JsonNode simple tools
  * @author MeteorCat
  */
-public final class JsonNodeUtil {
+public final class JsonNodeExtends {
+
+    /**
+     * Json Parser
+     */
+    private static ObjectMapper mapper;
+
 
     /**
      * node exist?
@@ -114,28 +121,8 @@ public final class JsonNodeUtil {
 
 
 
-
     /**
-     * is exists args ?
-     * @param node Json Node
-     * @param args Json Name
-     * @return boolean
-     */
-    public static boolean isExists(JsonNode node, String... args){
-        if(node == null){
-            return false;
-        }
-        for (String arg : args){
-            if(isEmpty(node, arg)){
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-    /**
-     * convert Map
+     * convert to Map
      * @param mapper ObjectMapper
      * @param data String
      * @return Optional<Map<K,V>>
@@ -143,7 +130,7 @@ public final class JsonNodeUtil {
      * @param <V> Map Value
      */
     @SuppressWarnings("unchecked")
-    public static<K,V> Optional<Map<K,V>> toMap(ObjectMapper mapper,String data){
+    public static<K,V> Optional<Map<K,V>> isMap(ObjectMapper mapper,String data){
         try{
             return Optional.ofNullable(mapper.readValue(data,Map.class));
         }catch (JsonProcessingException e){
@@ -154,14 +141,29 @@ public final class JsonNodeUtil {
 
 
     /**
-     * convert List
+     * convert to Map
+     * @param data String
+     * @return Optional<Map<K,V>>
+     * @param <K> Map Key
+     * @param <V> Map Value
+     */
+    public static<K,V> Optional<Map<K,V>> isMap(String data){
+        if(mapper == null){
+            mapper = new ObjectMapper();
+        }
+        return isMap(mapper,data);
+    }
+
+
+    /**
+     * convert to List
      * @param mapper ObjectMapper
      * @param data String
      * @return Optional<List<V>>
      * @param <V> List value
      */
     @SuppressWarnings("unchecked")
-    public static<V> Optional<List<V>> toList(ObjectMapper mapper,String data){
+    public static<V> Optional<List<V>> isList(ObjectMapper mapper,String data){
         try{
             return Optional.ofNullable(mapper.readValue(data,List.class));
         }catch (Exception e){
@@ -169,6 +171,22 @@ public final class JsonNodeUtil {
             return Optional.empty();
         }
     }
+
+
+    /**
+     * convert to List
+     * @param data String
+     * @return Optional<List<V>>
+     * @param <V> List value
+     */
+    public static<V> Optional<List<V>> isList(String data){
+        if(mapper == null){
+            mapper = new ObjectMapper();
+        }
+        return isList(mapper,data);
+    }
+
+
 
 
 
@@ -179,7 +197,7 @@ public final class JsonNodeUtil {
      * @return Optional<String>
      * @param <V> List value
      */
-    public static <V> Optional<String> toListStr(ObjectMapper mapper, List<V> list){
+    public static <V> Optional<String> isListStr(ObjectMapper mapper, List<V> list){
         try{
             return Optional.ofNullable(mapper.writeValueAsString(list));
         }catch (Exception e){
@@ -190,6 +208,21 @@ public final class JsonNodeUtil {
 
 
     /**
+     * List to json string
+     * @param list List
+     * @return Optional<String>
+     * @param <V> List value
+     */
+    public static <V> Optional<String> isListStr(List<V> list){
+        if(mapper == null){
+            mapper = new ObjectMapper();
+        }
+        return isListStr(mapper,list);
+    }
+
+
+
+    /**
      * Map to json string
      * @param mapper ObjectMapper
      * @param map Map
@@ -197,7 +230,7 @@ public final class JsonNodeUtil {
      * @param <K> Map Key
      * @param <V> Map Value
      */
-    public static <K,V> Optional<String> toMapStr(ObjectMapper mapper, Map<K,V> map){
+    public static <K,V> Optional<String> isMapStr(ObjectMapper mapper, Map<K,V> map){
         try{
             return Optional.ofNullable(mapper.writeValueAsString(map));
         }catch (Exception e){
@@ -208,13 +241,28 @@ public final class JsonNodeUtil {
 
 
     /**
+     * Map to json string
+     * @param map Map
+     * @return Optional<String>
+     * @param <K> Map Key
+     * @param <V> Map Value
+     */
+    public static <K,V> Optional<String> isMapStr(Map<K,V> map){
+        if(mapper == null){
+            mapper = new ObjectMapper();
+        }
+        return isMapStr(mapper,map);
+    }
+
+
+    /**
      * Parse json { "1": { "key":111 } }
      * @param mapper ObjectMapper
      * @param node JsonNode
      * @param clazz Convert class
      * @return Optional<Map<String,V>>
      */
-    public static<V> Optional<Map<String,V>> toEntity(ObjectMapper mapper,JsonNode node,Class<V> clazz){
+    public static<V> Optional<Map<String,V>> isEntity(ObjectMapper mapper,JsonNode node,Class<V> clazz){
         try{
             Iterator<Map.Entry<String,JsonNode>> elements = node.fields();
             Map<String,V> wrapper = new HashMap<>(node.size());
@@ -233,14 +281,60 @@ public final class JsonNodeUtil {
 
 
     /**
+     * Parse json { "1": { "key":111 } }
+     * @param node JsonNode
+     * @param clazz Convert class
+     * @return Optional<Map<String,V>>
+     */
+    public static<V> Optional<Map<String,V>> isEntity(JsonNode node,Class<V> clazz){
+        if(mapper == null){
+            mapper = new ObjectMapper();
+        }
+        return isEntity(mapper,node,clazz);
+    }
+
+
+
+    /**
      * Map convert JsonNode
      * @param mapper ObjectMapper
      * @param data Map
      * @return Optional<JsonNode>
      */
-    public static<K,V> Optional<JsonNode> toNode(ObjectMapper mapper,Map<K,V> data){
+    public static<K,V> Optional<JsonNode> isNode(ObjectMapper mapper,Map<K,V> data){
         return Optional.ofNullable(mapper.convertValue(data, JsonNode.class));
     }
+
+
+    /**
+     * Map convert JsonNode
+     * @param data Map
+     * @return Optional<JsonNode>
+     */
+    public static<K,V> Optional<JsonNode> isNode(Map<K,V> data){
+        if(mapper == null){
+            mapper = new ObjectMapper();
+        }
+        return isNode(mapper,data);
+    }
+
+
+    /**
+     * String convert JsonNode
+     * @param mapper ObjectMapper
+     * @param data String
+     * @return JsonNode
+     */
+    public static Optional<JsonNode> isNode(ObjectMapper mapper,String data){
+        try{
+            return Optional.ofNullable(mapper.readTree(data));
+        }catch (JsonProcessingException exception){
+            exception.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
+
 
 
 
